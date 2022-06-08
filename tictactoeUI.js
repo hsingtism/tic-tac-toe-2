@@ -1,35 +1,3 @@
-//requires jQuery
-//computer is -1, player is 1; player 1 is -1, player 2 is 1
-//Scoreboard
-let draws = 0
-let compWins = 0
-let userWins = 0//in case
-//two player mode
-let player1Wins = 0
-let player2Wins = 0
-
-//takes -1, 0, or 1, and also null
-// TODO rewrite this function
-function scoreboardUpdate(winner){
-    if (winner === 0) {
-        draws++ 
-        if (draws == 2){ //update when going to 2, back to singular in count update
-            $('#drawLabel').text('Draws')
-        }
-    } 
-    else if (playerCount == 1) {
-        if(winner === -1) {
-            compWins++ 
-        } else if (winner == 1) {userWins++}
-    } else {
-        if (winner === -1) {player1Wins++} 
-        else if (winner == 1) player2Wins++
-    }
-    $('#posScore').text(`${player1Wins + userWins}`)
-    $('#draw').text(`${draws}`)
-    $('#negScore').text(`${player2Wins + compWins}`)
-}
-
 //functions called by html
 let playerCount = 1
 let inputtingUser = 1 //-1 for computer, 1 and -1
@@ -71,8 +39,6 @@ function playerCountChange(count){
 //Game management
 let firstMove = 0 //0 for swap
 let allowUserMove = false
-
-const init = () => initGame()
 
 function boardUpdate() {
     let inputtingUserGhostPiece = ['gamePieceO', '', 'gamePieceX']

@@ -11,16 +11,13 @@
     <link rel="shortcut icon" href="../resource/icon.ico">
 
     <script src="https://hsing.org/lib/jquery-3.6.0.min.js"></script>
-    <!--if no internet <script src="../lib/jquery-3.6.0.min.js"></script> -->
     <link rel="stylesheet" href="styles.css">
-    <script src="tictactoe.js"></script>
-    <script src="tictactoeUI.js"></script>
-    <!-- <script src="improved.js"></script> -->
     <style>
         /*IE*/
-        .iewh{
+        .iewh {
             display: none;
         }
+
         @media all and (-ms-high-contrast: none),
         (-ms-high-contrast: active) {
             .iewh {
@@ -28,9 +25,16 @@
             }
         }
     </style>
+    <!-- <script src="tictactoe.js"></script>
+    <script src="tictactoeUI.js"></script> -->
+
+    <script src="tictactoe2.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', init)
+    </script>
 </head>
 
-<body onload="init()">
+<body>
     <iframe src="../https://hsing.org/ie-warning.html" width="100%" height="280px" title="Internet Explorer warning"
         referrerpolicy="same-origin" class="iewh"></iframe>
     <div class="positionTransformCenter" id="title">
@@ -38,48 +42,19 @@
     </div>
     <div class="top positionTransformCenter" id="scoreboard">
         <div class="scoreEntry">
-            <span class="scoreLabel" id="scoreLabel0">Player</span><br><span id="posScore">0</span>
+            <span class="scoreLabel" id="scoreLabel0">Player</span><br><span id="scoreL">0</span>
         </div>
         <div class="scoreEntry">
-            <span class="scoreLabel" id="drawLabel">Draw</span><br><span id="draw">0</span>
+            <span class="scoreLabel" id="drawLabel">Draw</span><br><span id="scoreM">0</span>
         </div>
         <div class="scoreEntry">
-            <span class="scoreLabel" id="scoreLabel1">Computer</span><br><span id="negScore">0</span>
+            <span class="scoreLabel" id="scoreLabel1">Computer</span><br><span id="scoreR">0</span>
         </div>
     </div>
-    <div class="boardContainer positionTransformCenter" id="board">
-        <div class="boardSpot" onclick="userClick(0,0)">
-            <div id="board00" class="gamePieceImaginary gamePieceX gamePieceCenter"></div>
-        </div>
-        <div class="boardSpot" onclick="userClick(0,1)">
-            <div id="board01" class="gamePieceImaginary gamePieceX gamePieceCenter"></div>
-        </div>
-        <div class="boardSpot" onclick="userClick(0,2)">
-            <div id="board02" class="gamePieceImaginary gamePieceX gamePieceCenter"></div>
-        </div>
-        <div class="boardSpot" onclick="userClick(1,0)">
-            <div id="board10" class="gamePieceImaginary gamePieceX gamePieceCenter"></div>
-        </div>
-        <div class="boardSpot" onclick="userClick(1,1)">
-            <div id="board11" class="gamePieceImaginary gamePieceX gamePieceCenter"></div>
-        </div>
-        <div class="boardSpot" onclick="userClick(1,2)">
-            <div id="board12" class="gamePieceImaginary gamePieceX gamePieceCenter"></div>
-        </div>
-        <div class="boardSpot" onclick="userClick(2,0)">
-            <div id="board20" class="gamePieceImaginary gamePieceX gamePieceCenter"></div>
-        </div>
-        <div class="boardSpot" onclick="userClick(2,1)">
-            <div id="board21" class="gamePieceImaginary gamePieceX gamePieceCenter"></div>
-        </div>
-        <div class="boardSpot" onclick="userClick(2,2)">
-            <div id="board22" class="gamePieceImaginary gamePieceX gamePieceCenter"></div>
-        </div>
-    </div>
+    <div class="boardContainer positionTransformCenter" id="board"></div>
     <div class="firstMoveSelectionGrid positionTransformCenter">
-        <div class="playerCountSelectionBox firstMoveSelected" id="1player" onclick="playerCountChange(1)">One player
-        </div>
-        <div class="playerCountSelectionBox" id="2player" onclick="playerCountChange(2)">Two players</div>
+        <div class="playerCountSelectionBox firstMoveSelected" id="1player">One player</div>
+        <div class="playerCountSelectionBox" id="2player">Two players</div>
     </div>
     <p style="font-size: 12px; color: #808080;">Made by <a href="https://hsing.org">Hsing</a></p>
     <!-- Global site tag (gtag.js) - Google Analytics -->
