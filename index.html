@@ -10,30 +10,18 @@
     <meta name="author" content="Hsing Lo">
     <link rel="shortcut icon" href="../resource/icon.ico">
 
-    <script src="https://hsing.org/lib/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /*IE*/
-        .iewh {
-            display: none;
-        }
-
-        @media all and (-ms-high-contrast: none),
-        (-ms-high-contrast: active) {
-            .iewh {
-                display: block;
-            }
-        }
+        .iewh {display: none;}
+        @media all and (-ms-high-contrast: none),(-ms-high-contrast: active){.iewh{display: block;}}
     </style>
 
     <script src="tictactoe2.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', init)
-    </script>
+    <script>document.addEventListener('DOMContentLoaded', init)</script>
 </head>
 
 <body>
-    <iframe src="../https://hsing.org/ie-warning.html" width="100%" height="280px" title="Internet Explorer warning"
+    <iframe src="https://hsing.org/ie-warning.html" width="100%" height="280px" title="Internet Explorer warning"
         referrerpolicy="same-origin" class="iewh"></iframe>
     <div class="positionTransformCenter" id="title"><h1>Tic-tac-toe aginst the computer</h1></div>
     <div class="top positionTransformCenter" id="scoreboard">
@@ -50,14 +38,8 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-QMK85V7F4W"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-        gtag('js', new Date());
-
-        gtag('config', 'G-QMK85V7F4W');
+        window.dataLayer = window.dataLayer || []; function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());gtag('config', 'G-QMK85V7F4W');
     </script>
 </body>
 

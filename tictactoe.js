@@ -60,14 +60,6 @@ function moveGenerationManager() {
     }
 }
 
-function computerMove(x,y) {
-    board[x][y] = inputtingUser
-    inputtingUser *= -1
-    moveCount++
-    boardUpdate()
-    boardSumSum()
-}
-
 function corners(){
     if (Math.random() < 0.5){
         return 0

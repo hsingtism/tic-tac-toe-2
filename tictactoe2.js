@@ -7,7 +7,12 @@ function init() {
     scoreBoard.init()
 }
 
-const ALERT_DELAY = 250
+/* originally this was to add a delay so the alerts for game end will not
+   send after the board stops updating, but for some reason even a delay
+   of zero allows for the board to finish drawing. i do not understand async
+   js and all this stuff */
+const ALERT_DELAY = 0 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const x = 1
 const o = -1 // COMPUTER ALWAYS O
@@ -15,7 +20,6 @@ const abs = Math.abs
 const sgn = Math.sign
 const min = Math.min
 const max = Math.max
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const GameInfo = {
     gameMode: 1,
@@ -59,9 +63,10 @@ const scoreBoard = {
     },
 
     updateScore: () => {
-        document.getElementById('scoreL').innerHTML = (scoreBoard.data.human ?? scoreBoard.data.playerX).toString()
+        // can't use ?? because of NaN created from the use of ++ above, but 0 has to be accounted
+        document.getElementById('scoreL').innerHTML = Math.floor(scoreBoard.data.human + 0.1 || scoreBoard.data.playerX + 0.1).toString() 
         document.getElementById('scoreM').innerHTML = (scoreBoard.data.draw).toString()
-        document.getElementById('scoreR').innerHTML = (scoreBoard.data.computer ?? scoreBoard.data.playerO).toString() 
+        document.getElementById('scoreR').innerHTML = Math.floor(scoreBoard.data.computer + 0.1 || scoreBoard.data.playerO + 0.1).toString() 
     },
 
     clear: () => {
