@@ -4,18 +4,21 @@ function init() {
     }
     document.getElementById('1player').onclick = () => interaction.user.playerCountSet(1)
     document.getElementById('2player').onclick = () => interaction.user.playerCountSet(2)
-    scoreBoard.clear()
+    scoreBoard.init()
 }
 
-let GameInfo = {
+const x = 1
+const o = -1
+
+const GameInfo = {
     gameActive: false,
     gameMode: 1,
-    nextMove: null,
+    nextMove: x,
 }
 
-let Board = Array(9).fill(0)
+const Board = Array(9).fill(0)
 
-let scoreBoard = {
+const scoreBoard = {
 
     data: {},
 
@@ -40,17 +43,21 @@ let scoreBoard = {
             playerO : 0,
             draw: 0
         }
+    },
+    
+    init: () => {
+        scoreBoard.clear()
+        scoreBoard.updateLabels()
+        scoreBoard.updateScore()
     }
-
 }
 
-let interaction = {
+const interaction = {
     user: {
 
         playerCountSet: (mode) => {
             GameInfo.gameMode = mode
-            scoreBoard.updateLabels()
-            scoreBoard.clear()
+            scoreBoard.init()
             UIManagement.playerCountSelectionUpdate(mode)
         },
 
@@ -61,17 +68,36 @@ let interaction = {
     }
 }
 
-let UIManagement = {
+const UIManagement = {
 
     playerCountSelectionUpdate: (mode) => {
-        let selectionClasses = [null, '1player', '2player']
-        let selectedClass = 'firstMoveSelected'
+        const selectionClasses = [null, '1player', '2player']
+        const selectedClass = 'firstMoveSelected'
         document.getElementById(selectionClasses[mode]).classList.add(selectedClass)
         document.getElementById(selectionClasses[mode - 1] || selectionClasses[mode + 1]).classList.remove(selectedClass)
     },
 
     drawBoard: () => {
-        console.log('called')
+        for(let i = 0; i < 9; i++) {
+            const activeElement = document.getElementById(`board${i.toString()}`)
+            activeElement.classList = 'gamePieceCenter'
+            switch (Board[i]) {
+                case x:
+                    activeElement.classList.add('gamePieceDisplay')
+                    activeElement.classList.add('gamePieceX')
+                break
+                case o:
+                    activeElement.classList.add('gamePieceDisplay')
+                    activeElement.classList.add('gamePieceO')
+                break
+                case 0:
+                    activeElement.classList.add('gamePieceImaginary')
+                    activeElement.classList.add(
+                        (GameInfo.nextMove == x) ? 'gamePieceX' : 'gamePieceO'
+                    )
+                break
+            }
+        }
     }
 
 }
