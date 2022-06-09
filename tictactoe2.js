@@ -11,7 +11,7 @@ function init() {
    send after the board stops updating, but for some reason even a delay
    of zero allows for the board to finish drawing. i do not understand async
    js and all this stuff */
-const ALERT_DELAY = 0 
+const ALERT_DELAY = 0
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const x = 1
@@ -26,7 +26,7 @@ const GameInfo = {
     moveCount: 0,
     nextMove: x,
 
-    restart : () => {
+    restart: () => {
         Board = Array(9).fill(0)
         GameInfo.moveCount = 0
         UIManagement.drawBoard()
@@ -34,16 +34,16 @@ const GameInfo = {
             interaction.computer.promptMove()
         }
     },
-    switchActive : () => {
+    switchActive: () => {
         GameInfo.nextMove *= -1
         GameInfo.moveCount++
     },
     handleEnd: (winner) => {
-        if(winner === 0) scoreBoard.data.draw++
-        if(winner == x) {scoreBoard.data.playerX++; scoreBoard.data.human++}
-        if(winner == o) {scoreBoard.data.playerO++; scoreBoard.data.computer++}
+        if (winner === 0) scoreBoard.data.draw++
+        if (winner == x) { scoreBoard.data.playerX++; scoreBoard.data.human++ }
+        if (winner == o) { scoreBoard.data.playerO++; scoreBoard.data.computer++ }
 
-        scoreBoard.updateScore() 
+        scoreBoard.updateScore()
         interaction.announce.gameEnd(winner)
     }
 }
@@ -64,9 +64,9 @@ const scoreBoard = {
 
     updateScore: () => {
         // can't use ?? because of NaN created from the use of ++ above, but 0 has to be accounted
-        document.getElementById('scoreL').innerHTML = Math.floor(scoreBoard.data.human + 0.1 || scoreBoard.data.playerX + 0.1).toString() 
+        document.getElementById('scoreL').innerHTML = Math.floor(scoreBoard.data.human + 0.1 || scoreBoard.data.playerX + 0.1).toString()
         document.getElementById('scoreM').innerHTML = (scoreBoard.data.draw).toString()
-        document.getElementById('scoreR').innerHTML = Math.floor(scoreBoard.data.computer + 0.1 || scoreBoard.data.playerO + 0.1).toString() 
+        document.getElementById('scoreR').innerHTML = Math.floor(scoreBoard.data.computer + 0.1 || scoreBoard.data.playerO + 0.1).toString()
     },
 
     clear: () => {
@@ -75,12 +75,12 @@ const scoreBoard = {
             computer: 0,
             draw: 0
         } : {
-            playerX : 0,
-            playerO : 0,
+            playerX: 0,
+            playerO: 0,
             draw: 0
         }
     },
-    
+
     init: () => {
         scoreBoard.clear()
         scoreBoard.updateLabels()
@@ -101,7 +101,7 @@ const interaction = {
         },
 
         makeMove: (position) => {
-            if (Board[position] != 0 || interaction.user.deny) return 
+            if (Board[position] != 0 || interaction.user.deny) return
             Board[position] = GameInfo.nextMove
             if (interaction.updateAndCheckWin()) return
             if (GameInfo.gameMode == 1 && GameInfo.nextMove == o) {
@@ -137,11 +137,11 @@ const interaction = {
                 alert('Draw')
             } else {
                 alert(
-                    (GameInfo.gameMode == 1)?
-                    `You ${(player == o) ? 'lose' : 'win'}`
-                    :
-                    `Player ${(player == o) ? 'O' : 'X'} wins`
-                    )
+                    (GameInfo.gameMode == 1) ?
+                        `You ${(player == o) ? 'lose' : 'win'}`
+                        :
+                        `Player ${(player == o) ? 'O' : 'X'} wins`
+                )
             }
             GameInfo.restart()
         }
@@ -172,24 +172,24 @@ const UIManagement = {
     },
 
     drawBoard: () => {
-        for(let i = 0; i < 9; i++) {
+        for (let i = 0; i < 9; i++) {
             const activeElement = document.getElementById(`board${i.toString()}`)
             activeElement.classList = 'gamePieceCenter'
             switch (Board[i]) {
                 case x:
                     activeElement.classList.add('gamePieceDisplay')
                     activeElement.classList.add('gamePieceX')
-                break
+                    break
                 case o:
                     activeElement.classList.add('gamePieceDisplay')
                     activeElement.classList.add('gamePieceO')
-                break
+                    break
                 case 0:
                     activeElement.classList.add('gamePieceImaginary')
                     activeElement.classList.add(
                         (GameInfo.nextMove == x) ? 'gamePieceX' : 'gamePieceO'
                     )
-                break
+                    break
             }
         }
     },
@@ -213,7 +213,7 @@ const BoardSup = {
         const wi = {
             linesSum: [], linesOccup: [], lastEmpty: []
         }
-        for(let i = 0; i < 8; i++) {
+        for (let i = 0; i < 8; i++) {
             const workingIndices = BoardSup.linesSumIndex[i]
             const wbd = [wBoard[workingIndices[0]], wBoard[workingIndices[1]], wBoard[workingIndices[2]]]//working board data
             wi.linesSum[i] = wbd[0] + wbd[1] + wbd[2]
