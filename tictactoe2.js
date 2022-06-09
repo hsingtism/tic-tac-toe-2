@@ -26,6 +26,9 @@ const GameInfo = {
         Board = Array(9).fill(0)
         GameInfo.moveCount = 0
         UIManagement.drawBoard()
+        if (GameInfo.gameMode == 1 && GameInfo.nextMove == o && GameInfo.moveCount == 0) {
+            interaction.computer.promptMove()
+        }
     },
     switchActive : () => {
         GameInfo.nextMove *= -1
@@ -83,36 +86,41 @@ const scoreBoard = {
 const interaction = {
 
     user: {
-        deny : false,
+        deny: false,
 
         playerCountSet: (mode) => {
             GameInfo.gameMode = mode
             scoreBoard.init()
+            GameInfo.restart()
             UIManagement.playerCountSelectionUpdate(mode)
         },
 
         makeMove: (position) => {
             if (Board[position] != 0 || interaction.user.deny) return 
             Board[position] = GameInfo.nextMove
-            GameInfo.switchActive()
-            UIManagement.drawBoard() // TODO make this completely drawn before continuing
-            if (BoardSup.checkWin()) GameInfo.handleEnd(BoardSup.checkWin())
-            if (GameInfo.moveCount == 9) GameInfo.handleEnd(0)
-            if (GameInfo.gameMode = 1 && GameInfo.nextMove == o) {
-                // TODO prompt computer move
+            if (interaction.updateAndCheckWin()) return
+            if (GameInfo.gameMode == 1 && GameInfo.nextMove == o) {
+                interaction.computer.promptMove()
             }
         }
 
     },
 
     computer: {
-        makeMove: (position) => {
+        deny: false,
 
+        makeMove: (position) => {
+            if (Board[position] != 0 || interaction.computer.deny) {
+                console.error(`computer tried to make an illegal ot denied move; position ${position}`)
+                console.trace()
+                alert("COMPUTER TRIED TO MAKE AN ILLEGAL OR DENIED MOVE. CHECK CONSOLE OR RELOAD PAGE")
+                return
+            }
+            Board[position] = GameInfo.nextMove
+            interaction.updateAndCheckWin()
         },
 
-        promptMove: () => {
-
-        }
+        promptMove: moveGeneration
     },
 
     announce: {
@@ -132,7 +140,21 @@ const interaction = {
             }
             GameInfo.restart()
         }
+    },
+
+    updateAndCheckWin() {
+        GameInfo.switchActive()
+        UIManagement.drawBoard()
+        if (BoardSup.checkWin()) {
+            GameInfo.handleEnd(BoardSup.checkWin())
+            return true
+        }
+        if (GameInfo.moveCount == 9) {
+            GameInfo.handleEnd(0)
+            return true
+        }
     }
+
 }
 
 const UIManagement = {
@@ -206,4 +228,8 @@ const BoardSup = {
         if (min(...lsa) == -3) return -1
         return 0
     }
+}
+
+function moveGeneration() {
+    interaction.computer.makeMove(Board.indexOf(0))
 }
