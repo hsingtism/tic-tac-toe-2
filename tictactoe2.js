@@ -7,16 +7,44 @@ function init() {
     scoreBoard.init()
 }
 
+const ALERT_DELAY = 250
+
 const x = 1
-const o = -1
+const o = -1 // COMPUTER ALWAYS O
+const abs = Math.abs
+const sgn = Math.sign
+const min = Math.min
+const max = Math.max
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const GameInfo = {
-    gameActive: false,
     gameMode: 1,
+    moveCount: 0,
     nextMove: x,
+
+    restart : () => {
+        Board = Array(9).fill(0)
+        GameInfo.moveCount = 0
+        UIManagement.drawBoard()
+    },
+    switchActive : () => {
+        GameInfo.nextMove *= -1
+        GameInfo.moveCount++
+    },
+    handleEnd: (winner) => {
+        if(winner === 0) scoreBoard.data.draw++
+        if(winner == x) {scoreBoard.data.playerX++; scoreBoard.data.human++}
+        if(winner == o) {scoreBoard.data.playerO++; scoreBoard.data.computer++}
+
+        scoreBoard.updateScore() 
+        interaction.announce.gameEnd(winner)
+    }
 }
 
-const Board = Array(9).fill(0)
+let Board = Array(9).fill(0)
+Board.linesSum = Array(8).fill(0)
+Board.linesOccup = Array(8).fill(0)
+Board.lastEmpty = Array(8).fill(null) // with respect to linesSumIndex
 
 const scoreBoard = {
 
@@ -53,7 +81,9 @@ const scoreBoard = {
 }
 
 const interaction = {
+
     user: {
+        deny : false,
 
         playerCountSet: (mode) => {
             GameInfo.gameMode = mode
@@ -62,9 +92,46 @@ const interaction = {
         },
 
         makeMove: (position) => {
-            return //TODO
+            if (Board[position] != 0 || interaction.user.deny) return 
+            Board[position] = GameInfo.nextMove
+            GameInfo.switchActive()
+            UIManagement.drawBoard() // TODO make this completely drawn before continuing
+            if (BoardSup.checkWin()) GameInfo.handleEnd(BoardSup.checkWin())
+            if (GameInfo.moveCount == 9) GameInfo.handleEnd(0)
+            if (GameInfo.gameMode = 1 && GameInfo.nextMove == o) {
+                // TODO prompt computer move
+            }
         }
 
+    },
+
+    computer: {
+        makeMove: (position) => {
+
+        },
+
+        promptMove: () => {
+
+        }
+    },
+
+    announce: {
+        gameEnd: async (player) => {
+            interaction.user.deny = true
+            await sleep(ALERT_DELAY)
+            interaction.user.deny = false
+            if (player === 0) {
+                alert('Draw')
+            } else {
+                alert(
+                    (GameInfo.gameMode == 1)?
+                    `You ${(player == o) ? 'lose' : 'win'}`
+                    :
+                    `Player ${(player == o) ? 'O' : 'X'} wins`
+                    )
+            }
+            GameInfo.restart()
+        }
     }
 }
 
@@ -98,6 +165,45 @@ const UIManagement = {
                 break
             }
         }
-    }
+    },
+}
 
+const BoardSup = {
+    linesSumIndex: [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+    ],
+
+    // use false or empty for main board, else only input valid board array
+    updateData: (board) => {
+        const wBoard = (board) ? board : Board
+        const wi = {
+            linesSum: [], linesOccup: [], lastEmpty: []
+        }
+        for(let i = 0; i < 8; i++) {
+            const workingIndices = BoardSup.linesSumIndex[i]
+            const wbd = [wBoard[workingIndices[0]], wBoard[workingIndices[1]], wBoard[workingIndices[2]]]//working board data
+            wi.linesSum[i] = wbd[0] + wbd[1] + wbd[2]
+            wi.linesOccup[i] = abs(wbd[0]) + abs(wbd[1]) + abs(wbd[2])
+            wi.lastEmpty[i] = (wi.linesOccup[i] == 2) ? wbd.indexOf(0) : null
+        }
+        if (board) return wi
+        Board.linesSum = wi.linesSum
+        Board.linesOccup = wi.linesOccup
+        Board.lastEmpty = wi.lastEmpty
+    },
+
+    checkWin: (board) => {
+        const wBoard = (board) ? board : Board
+        const lsa = BoardSup.updateData(wBoard).linesSum
+        if (max(...lsa) == 3) return 1
+        if (min(...lsa) == -3) return -1
+        return 0
+    }
 }
