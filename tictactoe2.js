@@ -31,6 +31,8 @@ const GameInfo = {
         GameInfo.moveCount = 0
         UIManagement.drawBoard()
         if (GameInfo.gameMode == 1 && GameInfo.nextMove == o && GameInfo.moveCount == 0) {
+            interaction.computer.user = true
+            interaction.computer.deny = false
             interaction.computer.promptMove()
         }
     },
@@ -105,6 +107,8 @@ const interaction = {
             Board[position] = GameInfo.nextMove
             if (interaction.updateAndCheckWin()) return
             if (GameInfo.gameMode == 1 && GameInfo.nextMove == o) {
+                interaction.computer.user = true
+                interaction.computer.deny = false
                 interaction.computer.promptMove()
             }
         }
@@ -112,7 +116,7 @@ const interaction = {
     },
 
     computer: {
-        deny: false,
+        deny: true,
 
         makeMove: (position) => {
             if (Board[position] != 0 || interaction.computer.deny) {
@@ -122,6 +126,8 @@ const interaction = {
                 return
             }
             Board[position] = GameInfo.nextMove
+            interaction.computer.deny = true
+            interaction.computer.user = false
             interaction.updateAndCheckWin()
         },
 
