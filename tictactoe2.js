@@ -54,6 +54,7 @@ let Board = Array(9).fill(0)
 Board.linesSum = Array(8).fill(0)
 Board.linesOccup = Array(8).fill(0)
 Board.lastEmpty = Array(8).fill(null) // with respect to linesSumIndex
+Board.emptyCells = []
 
 const scoreBoard = {
 
@@ -107,7 +108,7 @@ const interaction = {
             Board[position] = GameInfo.nextMove
             if (interaction.updateAndCheckWin()) return
             if (GameInfo.gameMode == 1 && GameInfo.nextMove == o) {
-                interaction.computer.user = true
+                interaction.user.deny = true
                 interaction.computer.deny = false
                 interaction.computer.promptMove()
             }
@@ -121,17 +122,20 @@ const interaction = {
         makeMove: (position) => {
             if (Board[position] != 0 || interaction.computer.deny) {
                 console.error(`computer tried to make an illegal ot denied move; position ${position}`)
+                console.log(interaction.computer.deny)
                 console.trace()
                 alert("COMPUTER TRIED TO MAKE AN ILLEGAL OR DENIED MOVE. CHECK CONSOLE OR RELOAD PAGE")
                 return
             }
             Board[position] = GameInfo.nextMove
             interaction.computer.deny = true
-            interaction.computer.user = false
+            interaction.user.deny = false
             interaction.updateAndCheckWin()
         },
 
-        promptMove: moveGeneration
+        promptMove: () => {
+            interaction.computer.makeMove(moveGeneration())
+        }
     },
 
     announce: {
@@ -226,7 +230,9 @@ const BoardSup = {
             wi.linesOccup[i] = abs(wbd[0]) + abs(wbd[1]) + abs(wbd[2])
             wi.lastEmpty[i] = (wi.linesOccup[i] == 2) ? wbd.indexOf(0) : null
         }
+        wi.emptyCells = BoardSup.listEmptyCells(wBoard)
         if (board) return wi
+        Board.emptyCells = wi.emptyCells
         Board.linesSum = wi.linesSum
         Board.linesOccup = wi.linesOccup
         Board.lastEmpty = wi.lastEmpty
@@ -238,9 +244,40 @@ const BoardSup = {
         if (max(...lsa) == 3) return 1
         if (min(...lsa) == -3) return -1
         return 0
+    },
+
+    listEmptyCells: (board) => {
+        let l = []
+        for(let i = 0; i < 9; i++) {
+            if (board[i] === 0) l.push(i)
+        }
+        return l
     }
 }
 
+const Random = {
+    rint: r => Math.floor(Math.random() * r),
+    corners: () => [0, 2, 6, 8][Random.rint(4)],
+    sides: () => Random.rint(4) * 2 + 1,
+    center: () => 4,
+    uniform: () => Random.rint(8)
+}
+
 function moveGeneration() {
-    interaction.computer.makeMove(Board.indexOf(0))
+    BoardSup.updateData()
+    const empty = Board.emptyCells
+
+    let board = []; let n = 9 // data must be cleaned for downstream functions
+    while(n--) board[n] = Board[n]
+
+    if(GameInfo.moveCount == 0) return Random.corners()
+    
+    // call tree here
+
+    return empty[empty.length - 1]
+}
+
+function treeEval(board) {
+    minfo = BoardSup.updateData(board)
+    
 }
