@@ -134,7 +134,9 @@ const interaction = {
         },
 
         promptMove: () => {
+            console.time('move')
             interaction.computer.makeMove(moveGeneration())
+            console.timeEnd('move')
         }
     },
 
@@ -263,6 +265,10 @@ const Random = {
     uniform: () => Random.rint(8)
 }
 
+function eval(board, player) {
+
+}
+
 function moveGeneration() {
     BoardSup.updateData()
     const empty = Board.emptyCells
@@ -272,12 +278,17 @@ function moveGeneration() {
 
     if(GameInfo.moveCount == 0) return Random.corners()
     
-    // call tree here
+    let teval = Number.NEGATIVE_INFINITY
+    let bestPos
+    for(let i = 0; i < empty.length; i++) {
+        let tBoard = board
+        tBoard[empty[i]] = GameInfo.nextMove
+        let ec = eval(tBoard, GameInfo.nextMove) // preevnt multiple calls
+        if(ec > teval) {
+            teval = ec
+            bestPos = empty[i]
+        }
+    }
 
-    return empty[empty.length - 1]
-}
-
-function treeEval(board) {
-    minfo = BoardSup.updateData(board)
-    
+    return bestPos
 }
