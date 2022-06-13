@@ -1,3 +1,17 @@
+const EVALUATION_MODE = true
+const DEBUG = false
+
+if (EVALUATION_MODE) {
+    console.log('evaluation mode is enabled, make a valid call to interaction.user.makeMove or click a random cell to start')
+}
+
+if (DEBUG == false) {
+    console.log('console will be partially disabled')
+    console.log = Function.prototype
+    console.time = Function.prototype
+    console.timeEnd = Function.prototype
+}
+
 function init() {
     for (let i = 0; i < 9; i++) {
         document.getElementById('board').innerHTML += `<div class="boardSpot" onclick="interaction.user.makeMove(${i})"><div id="board${i.toString()}" class="gamePieceImaginary gamePieceX gamePieceCenter"></div>`
@@ -34,6 +48,9 @@ const GameInfo = {
             interaction.computer.user = true
             interaction.computer.deny = false
             interaction.computer.promptMove()
+        }
+        if (EVALUATION_MODE) {
+            evaluationManager()
         }
     },
     switchActive: () => {
@@ -131,6 +148,7 @@ const interaction = {
             interaction.computer.deny = true
             interaction.user.deny = false
             interaction.updateAndCheckWin()
+            if(EVALUATION_MODE) evaluationManager()
         },
 
         promptMove: () => {
@@ -145,15 +163,17 @@ const interaction = {
             interaction.user.deny = true
             await sleep(ALERT_DELAY)
             interaction.user.deny = false
-            if (player === 0) {
-                alert('Draw')
-            } else {
-                alert(
-                    (GameInfo.gameMode == 1) ?
-                        `You ${(player == o) ? 'lose' : 'win'}`
-                        :
-                        `Player ${(player == o) ? 'O' : 'X'} wins`
-                )
+            if (!EVALUATION_MODE) {
+                if (player === 0) {
+                    alert('Draw')
+                } else {
+                    alert(
+                        (GameInfo.gameMode == 1) ?
+                            `You ${(player == o) ? 'lose' : 'win'}`
+                            :
+                            `Player ${(player == o) ? 'O' : 'X'} wins`
+                    )
+                }
             }
             GameInfo.restart()
         }
@@ -184,6 +204,7 @@ const UIManagement = {
     },
 
     drawBoard: () => {
+        if (EVALUATION_MODE) return
         for (let i = 0; i < 9; i++) {
             const activeElement = document.getElementById(`board${i.toString()}`)
             activeElement.classList = 'gamePieceCenter'
@@ -250,7 +271,7 @@ const BoardSup = {
 
     listEmptyCells: (board) => {
         let l = []
-        for(let i = 0; i < 9; i++) {
+        for (let i = 0; i < 9; i++) {
             if (board[i] === 0) l.push(i)
         }
         return l
@@ -268,50 +289,52 @@ const Random = {
 let evalcalls = 0
 
 function eval(board, player, moveCount) {
+    // console.log(board, player, moveCount)
     evalcalls++
-    const win = BoardSup.checkWin(board)
-    if (win) return win
-    if (moveCount == 9) return 0
+    const win = -BoardSup.checkWin(board)
+    if (win == 1) return win * (50 - moveCount)
+    if (win == -1) return win * (50 - moveCount) * 20
+    const empty = BoardSup.listEmptyCells(board)
+    if (empty.length == 0) return 0
     let ff, teval
-    
-    /*
-    if (player == GameInfo.nextMove) {
-        teval = Number.POSITIVE_INFINITY
+
+    if (player == -GameInfo.nextMove) {
+        teval = 10000
         ff = Math.min
     } else {
-        teval = Number.NEGATIVE_INFINITY
+        teval = -10000
         ff = Math.max
     }
-    const empty = BoardSup.listEmptyCells(board)
+
     let tBoard = board
-    for(let i = 0; i < empty.length; i++) {
+    for (let i = 0; i < empty.length; i++) {
         tBoard[empty[i]] = player
-        let treeNext = eval(tBoard, -player, moveCount - 1)
+        teval = ff(teval, eval(tBoard, -player, moveCount + 1))
         tBoard[empty[i]] = 0
-        teval = ff(teval, treeNext)
-    } 
-    */
+    }
 
     return teval
 }
 
 function moveGeneration() {
     BoardSup.updateData()
+    // return Board.emptyCells[Random.rint(Board.emptyCells.length)]
     const empty = Board.emptyCells
 
     let board = Array(9); let n = 9 // data must be cleaned for downstream functions
-    while(n--) board[n] = Board[n]
+    while (n--) board[n] = Board[n]
 
-    if(GameInfo.moveCount == 0) return Random.corners()
+    if (GameInfo.moveCount == 0) return Random.corners()
 
     let teval = Number.NEGATIVE_INFINITY
-    let bestPos 
+    let bestPos
     let tBoard = board
-    for(let i = 0; i < empty.length; i++) {
+    for (let i = 0; i < empty.length; i++) {
         tBoard[empty[i]] = GameInfo.nextMove
         let ec = eval(tBoard, GameInfo.nextMove, GameInfo.moveCount) // preevnt multiple calls
+        console.log(tBoard, ec)
         tBoard[empty[i]] = 0
-        if(ec > teval) {
+        if (ec > teval) {
             teval = ec
             bestPos = empty[i]
         }
@@ -320,3 +343,11 @@ function moveGeneration() {
     return bestPos
 
 }
+
+// const evaluationManager = Function.prototype
+function evaluationManager() {
+    BoardSup.updateData()
+    interaction.user.makeMove(
+        Board.emptyCells[Random.rint(Board.emptyCells.length)]
+    )
+} 
