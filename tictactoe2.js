@@ -288,17 +288,16 @@ const Random = {
 
 let evalcalls = 0
 
-function eval(board, player, moveCount) {
-    // console.log(board, player, moveCount)
+// because of the way the cells are enumerated, the computer will aim for the lowest evaluation score
+function eval(board, maximizingplayer, moveCount) {
     evalcalls++
-    const win = -BoardSup.checkWin(board)
-    if (win == 1) return win * (50 - moveCount)
-    if (win == -1) return win * (50 - moveCount) * 20
+    const win = BoardSup.checkWin(board)
+    if (win) return win
     const empty = BoardSup.listEmptyCells(board)
     if (empty.length == 0) return 0
     let ff, teval
 
-    if (player == -GameInfo.nextMove) {
+    if (maximizingplayer) {
         teval = 10000
         ff = Math.min
     } else {
@@ -308,8 +307,8 @@ function eval(board, player, moveCount) {
 
     let tBoard = board
     for (let i = 0; i < empty.length; i++) {
-        tBoard[empty[i]] = player
-        teval = ff(teval, eval(tBoard, -player, moveCount + 1))
+        tBoard[empty[i]] = maximizingplayer ? GameInfo.nextMove : -GameInfo.nextMove
+        teval = ff(teval, eval(tBoard, !maximizingplayer, moveCount + 1))
         tBoard[empty[i]] = 0
     }
 
@@ -326,15 +325,14 @@ function moveGeneration() {
 
     if (GameInfo.moveCount == 0) return Random.corners()
 
-    let teval = Number.NEGATIVE_INFINITY
+    let teval = Number.POSITIVE_INFINITY
     let bestPos
     let tBoard = board
     for (let i = 0; i < empty.length; i++) {
         tBoard[empty[i]] = GameInfo.nextMove
-        let ec = eval(tBoard, GameInfo.nextMove, GameInfo.moveCount) // preevnt multiple calls
-        console.log(tBoard, ec)
+        let ec = eval(tBoard, false, GameInfo.moveCount) // preevnt multiple calls
         tBoard[empty[i]] = 0
-        if (ec > teval) {
+        if (ec < teval) {
             teval = ec
             bestPos = empty[i]
         }
@@ -344,7 +342,6 @@ function moveGeneration() {
 
 }
 
-// const evaluationManager = Function.prototype
 function evaluationManager() {
     BoardSup.updateData()
     interaction.user.makeMove(
