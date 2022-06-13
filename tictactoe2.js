@@ -265,30 +265,58 @@ const Random = {
     uniform: () => Random.rint(8)
 }
 
-function eval(board, player) {
+let evalcalls = 0
 
+function eval(board, player, moveCount) {
+    evalcalls++
+    const win = BoardSup.checkWin(board)
+    if (win) return win
+    if (moveCount == 9) return 0
+    let ff, teval
+    
+    /*
+    if (player == GameInfo.nextMove) {
+        teval = Number.POSITIVE_INFINITY
+        ff = Math.min
+    } else {
+        teval = Number.NEGATIVE_INFINITY
+        ff = Math.max
+    }
+    const empty = BoardSup.listEmptyCells(board)
+    let tBoard = board
+    for(let i = 0; i < empty.length; i++) {
+        tBoard[empty[i]] = player
+        let treeNext = eval(tBoard, -player, moveCount - 1)
+        tBoard[empty[i]] = 0
+        teval = ff(teval, treeNext)
+    } 
+    */
+
+    return teval
 }
 
 function moveGeneration() {
     BoardSup.updateData()
     const empty = Board.emptyCells
 
-    let board = []; let n = 9 // data must be cleaned for downstream functions
+    let board = Array(9); let n = 9 // data must be cleaned for downstream functions
     while(n--) board[n] = Board[n]
 
     if(GameInfo.moveCount == 0) return Random.corners()
-    
+
     let teval = Number.NEGATIVE_INFINITY
-    let bestPos
+    let bestPos 
+    let tBoard = board
     for(let i = 0; i < empty.length; i++) {
-        let tBoard = board
         tBoard[empty[i]] = GameInfo.nextMove
-        let ec = eval(tBoard, GameInfo.nextMove) // preevnt multiple calls
+        let ec = eval(tBoard, GameInfo.nextMove, GameInfo.moveCount) // preevnt multiple calls
+        tBoard[empty[i]] = 0
         if(ec > teval) {
             teval = ec
             bestPos = empty[i]
         }
     }
-
+    console.log(evalcalls); evalcalls = 0
     return bestPos
+
 }
