@@ -30,8 +30,6 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const x = 1
 const o = -1 // COMPUTER ALWAYS O
-const abs = Math.abs
-const sgn = Math.sign
 const min = Math.min
 const max = Math.max
 
@@ -69,8 +67,6 @@ const GameInfo = {
 
 let Board = Array(9).fill(0)
 Board.linesSum = Array(8).fill(0)
-Board.linesOccup = Array(8).fill(0)
-Board.lastEmpty = Array(8).fill(null) // with respect to linesSumIndex
 Board.emptyCells = []
 
 const scoreBoard = {
@@ -243,22 +239,16 @@ const BoardSup = {
     // use false or empty for main board, else only input valid board array
     updateData: (board) => {
         const wBoard = (board) ? board : Board
-        const wi = {
-            linesSum: [], linesOccup: [], lastEmpty: []
-        }
+        const wi = {linesSum: []}
         for (let i = 0; i < 8; i++) {
             const workingIndices = BoardSup.linesSumIndex[i]
             const wbd = [wBoard[workingIndices[0]], wBoard[workingIndices[1]], wBoard[workingIndices[2]]]//working board data
             wi.linesSum[i] = wbd[0] + wbd[1] + wbd[2]
-            wi.linesOccup[i] = abs(wbd[0]) + abs(wbd[1]) + abs(wbd[2])
-            wi.lastEmpty[i] = (wi.linesOccup[i] == 2) ? wbd.indexOf(0) : null
         }
         wi.emptyCells = BoardSup.listEmptyCells(wBoard)
         if (board) return wi
         Board.emptyCells = wi.emptyCells
         Board.linesSum = wi.linesSum
-        Board.linesOccup = wi.linesOccup
-        Board.lastEmpty = wi.lastEmpty
     },
 
     checkWin: (board) => {
@@ -299,10 +289,10 @@ function eval(board, maximizingplayer, moveCount) {
 
     if (maximizingplayer) {
         teval = 10000
-        ff = Math.min
+        ff = min
     } else {
         teval = -10000
-        ff = Math.max
+        ff = max
     }
 
     let tBoard = board
