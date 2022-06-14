@@ -1,4 +1,4 @@
-const EVALUATION_MODE = true
+const EVALUATION_MODE = false
 const DEBUG = false
 
 if (EVALUATION_MODE) {
@@ -6,7 +6,6 @@ if (EVALUATION_MODE) {
 }
 
 if (DEBUG == false) {
-    console.log('console will be partially disabled')
     console.log = Function.prototype
     console.time = Function.prototype
     console.timeEnd = Function.prototype
