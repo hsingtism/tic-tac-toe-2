@@ -317,13 +317,16 @@ function eval(board, maximizingplayer, moveCount) {
 
 function moveGeneration() {
     BoardSup.updateData()
-    // return Board.emptyCells[Random.rint(Board.emptyCells.length)]
     const empty = Board.emptyCells
 
     let board = Array(9); let n = 9 // data must be cleaned for downstream functions
     while (n--) board[n] = Board[n]
 
-    if (GameInfo.moveCount == 0) return Random.corners()
+    if (GameInfo.moveCount < 2) { // optional optimization
+        const userPos = board.indexOf(-GameInfo.nextMove)
+        if (userPos == 4 || userPos == -1) return Random.corners()
+        return Random.center()
+    }
 
     let teval = Number.POSITIVE_INFINITY
     let bestPos
@@ -337,14 +340,14 @@ function moveGeneration() {
             bestPos = empty[i]
         }
     }
-    console.log(evalcalls); evalcalls = 0
+    console.log('function calls', evalcalls); evalcalls = 0
     return bestPos
 
 }
 
 function evaluationManager() {
     BoardSup.updateData()
-    interaction.user.makeMove(
-        Board.emptyCells[Random.rint(Board.emptyCells.length)]
-    )
+    interaction.user.makeMove(Board.emptyCells[Random.rint(Board.emptyCells.length)])
 } 
+
+const res = () => scoreBoard.data.computer / scoreBoard.data.draw
