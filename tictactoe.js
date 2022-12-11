@@ -268,7 +268,7 @@ function moveGeneration() {
     let tempBoard = board
     for (let i = 0; i < empty.length; i++) {
         tempBoard[empty[i]] = GameInfo.nextMove
-        let ec = eval(tempBoard, false, GameInfo.moveCount) // preevnt multiple calls
+        let ec = eval(tempBoard, false, GameInfo.moveCount, -Infinity, Infinity) // preevnt multiple calls
         tempBoard[empty[i]] = 0
         if (ec < tempEval) {
             tempEval = ec
@@ -282,7 +282,7 @@ function moveGeneration() {
 
 let evalcalls = 0
 // because of the way the cells are enumerated, the computer will aim for the lowest evaluation score
-function eval(board, maximizingplayer, moveCount) {
+function eval(board, maximizingplayer, moveCount, alpha, beta) {
     evalcalls++
     const win = BoardSup.checkWin(board)
     if (win) return win
@@ -301,15 +301,21 @@ function eval(board, maximizingplayer, moveCount) {
     let tempBoard = board
     for (let i = 0; i < empty.length; i++) {
         tempBoard[empty[i]] = maximizingplayer ? GameInfo.nextMove : -GameInfo.nextMove
-        tempEval = filterFunction(tempEval, eval(tempBoard, !maximizingplayer, moveCount + 1))
+        tempEval = filterFunction(tempEval, eval(tempBoard, !maximizingplayer, moveCount + 1, alpha, beta))
         tempBoard[empty[i]] = 0
+        if(!maximizingplayer) {
+            beta = filterFunction(tempEval, beta)
+        } else {
+            alpha = filterFunction(tempEval, alpha)
+        }
+        if (beta <= alpha) break
     }
 
     return tempEval
 }
 
 function evaluationManager() {
-    BoardSup.updateData()
+    BoardSup.updateData() 
     interaction.user.makeMove(Board.emptyCells[Random.rint(Board.emptyCells.length)])
 } 
 
