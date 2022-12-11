@@ -1,4 +1,4 @@
-const EVALUATION_MODE = true
+const EVALUATION_MODE = false
 const DEBUG = false
 
 if (EVALUATION_MODE) {
