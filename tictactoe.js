@@ -1,4 +1,4 @@
-const EVALUATION_MODE = false
+const EVALUATION_MODE = true
 const DEBUG = false
 
 if (EVALUATION_MODE) {
@@ -250,35 +250,6 @@ const Random = {
     uniform: () => Random.rint(8)
 }
 
-let evalcalls = 0
-
-// because of the way the cells are enumerated, the computer will aim for the lowest evaluation score
-function eval(board, maximizingplayer, moveCount) {
-    evalcalls++
-    const win = BoardSup.checkWin(board)
-    if (win) return win
-    const empty = BoardSup.listEmptyCells(board)
-    if (empty.length == 0) return 0
-    let ff, teval
-
-    if (maximizingplayer) {
-        teval = Infinity
-        ff = min
-    } else {
-        teval = -Infinity
-        ff = max
-    }
-
-    let tBoard = board
-    for (let i = 0; i < empty.length; i++) {
-        tBoard[empty[i]] = maximizingplayer ? GameInfo.nextMove : -GameInfo.nextMove
-        teval = ff(teval, eval(tBoard, !maximizingplayer, moveCount + 1))
-        tBoard[empty[i]] = 0
-    }
-
-    return teval
-}
-
 function moveGeneration() {
     BoardSup.updateData()
     const empty = Board.emptyCells
@@ -292,21 +263,49 @@ function moveGeneration() {
         return Random.center()
     }
 
-    let teval = Number.POSITIVE_INFINITY
+    let tempEval = Infinity
     let bestPos
-    let tBoard = board
+    let tempBoard = board
     for (let i = 0; i < empty.length; i++) {
-        tBoard[empty[i]] = GameInfo.nextMove
-        let ec = eval(tBoard, false, GameInfo.moveCount) // preevnt multiple calls
-        tBoard[empty[i]] = 0
-        if (ec < teval) {
-            teval = ec
+        tempBoard[empty[i]] = GameInfo.nextMove
+        let ec = eval(tempBoard, false, GameInfo.moveCount) // preevnt multiple calls
+        tempBoard[empty[i]] = 0
+        if (ec < tempEval) {
+            tempEval = ec
             bestPos = empty[i]
         }
     }
     console.log('function calls', evalcalls); evalcalls = 0
     return bestPos
 
+}
+
+let evalcalls = 0
+// because of the way the cells are enumerated, the computer will aim for the lowest evaluation score
+function eval(board, maximizingplayer, moveCount) {
+    evalcalls++
+    const win = BoardSup.checkWin(board)
+    if (win) return win
+    const empty = BoardSup.listEmptyCells(board)
+    if (empty.length == 0) return 0
+    let filterFunction, tempEval
+
+    if (maximizingplayer) {
+        tempEval = Infinity
+        filterFunction = min
+    } else {
+        tempEval = -Infinity
+        filterFunction = max
+    }
+
+    let tempBoard = board
+    for (let i = 0; i < empty.length; i++) {
+        tempBoard[empty[i]] = maximizingplayer ? GameInfo.nextMove : -GameInfo.nextMove
+        tempEval = filterFunction(tempEval, eval(tempBoard, !maximizingplayer, moveCount + 1))
+        tempBoard[empty[i]] = 0
+    }
+
+    return tempEval
 }
 
 function evaluationManager() {
