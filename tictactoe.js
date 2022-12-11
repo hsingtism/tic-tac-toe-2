@@ -20,12 +20,7 @@ function init() {
     scoreBoard.init()
 }
 
-/* originally this was to add a delay so the alerts for game end will not
-   send after the board stops updating, but for some reason even a delay
-   of zero allows for the board to finish drawing. i do not understand async
-   js and all this stuff */
-const ALERT_DELAY = 0
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+const forceDisplayUpdate = () => new Promise(resolve => setTimeout(resolve, 0))
 
 const x = 1
 const o = -1 // COMPUTER ALWAYS O
@@ -50,17 +45,28 @@ const GameInfo = {
             evaluationManager()
         }
     },
-    switchActive: () => {
-        GameInfo.nextMove *= -1
-        GameInfo.moveCount++
-    },
-    handleEnd: (winner) => {
+    handleEnd: async (winner) => {
         if (winner === 0) scoreBoard.data.draw++
         if (winner == x) { scoreBoard.data.playerX++; scoreBoard.data.human++ }
         if (winner == o) { scoreBoard.data.playerO++; scoreBoard.data.computer++ }
 
         scoreBoard.updateScore()
-        interaction.announce.gameEnd(winner)
+        interaction.user.deny = true
+        await forceDisplayUpdate()
+        interaction.user.deny = false
+        if (!EVALUATION_MODE) {
+            if (winner === 0) {
+                alert('Draw')
+            } else {
+                alert(
+                    (GameInfo.gameMode == 1) ?
+                        `You ${(winner == o) ? 'lose' : 'win'}`
+                        :
+                        `Player ${(winner == o) ? 'O' : 'X'} wins`
+                )
+            }
+        }
+        GameInfo.restart()
     }
 }
 
@@ -72,11 +78,6 @@ const scoreBoard = {
 
     data: {},
 
-    updateLabels: () => {
-        document.getElementById('scoreLabel0').innerHTML = (GameInfo.gameMode == 1) ? 'You' : 'Player X'
-        document.getElementById('scoreLabel1').innerHTML = (GameInfo.gameMode == 1) ? 'Computer' : 'Player O'
-    },
-
     updateScore: () => {
         // can't use ?? because of NaN created from the use of ++ above, but 0 has to be accounted
         document.getElementById('scoreL').innerHTML = Math.floor(scoreBoard.data.human + 0.1 || scoreBoard.data.playerX + 0.1).toString()
@@ -84,7 +85,7 @@ const scoreBoard = {
         document.getElementById('scoreR').innerHTML = Math.floor(scoreBoard.data.computer + 0.1 || scoreBoard.data.playerO + 0.1).toString()
     },
 
-    clear: () => {
+    init: () => {
         scoreBoard.data = (GameInfo.gameMode == 1) ? {
             human: 0,
             computer: 0,
@@ -94,11 +95,8 @@ const scoreBoard = {
             playerO: 0,
             draw: 0
         }
-    },
-
-    init: () => {
-        scoreBoard.clear()
-        scoreBoard.updateLabels()
+        document.getElementById('scoreLabel0').innerHTML = (GameInfo.gameMode == 1) ? 'You' : 'Player X'
+        document.getElementById('scoreLabel1').innerHTML = (GameInfo.gameMode == 1) ? 'Computer' : 'Player O'
         scoreBoard.updateScore()
     }
 }
@@ -131,7 +129,9 @@ const interaction = {
     computer: {
         deny: true,
 
-        makeMove: (position) => {
+        promptMove: () => {
+            console.time('move')
+            const position = moveGeneration()
             if (Board[position] != 0 || interaction.computer.deny) {
                 console.error(`computer tried to make an illegal ot denied move; position ${position}`)
                 console.log(interaction.computer.deny)
@@ -144,38 +144,13 @@ const interaction = {
             interaction.user.deny = false
             interaction.updateAndCheckWin()
             if(EVALUATION_MODE) evaluationManager()
-        },
-
-        promptMove: () => {
-            console.time('move')
-            interaction.computer.makeMove(moveGeneration())
             console.timeEnd('move')
         }
     },
 
-    announce: {
-        gameEnd: async (player) => {
-            interaction.user.deny = true
-            await sleep(ALERT_DELAY)
-            interaction.user.deny = false
-            if (!EVALUATION_MODE) {
-                if (player === 0) {
-                    alert('Draw')
-                } else {
-                    alert(
-                        (GameInfo.gameMode == 1) ?
-                            `You ${(player == o) ? 'lose' : 'win'}`
-                            :
-                            `Player ${(player == o) ? 'O' : 'X'} wins`
-                    )
-                }
-            }
-            GameInfo.restart()
-        }
-    },
-
     updateAndCheckWin() {
-        GameInfo.switchActive()
+        GameInfo.nextMove *= -1
+        GameInfo.moveCount++
         UIManagement.drawBoard()
         if (BoardSup.checkWin()) {
             GameInfo.handleEnd(BoardSup.checkWin())
@@ -287,10 +262,10 @@ function eval(board, maximizingplayer, moveCount) {
     let ff, teval
 
     if (maximizingplayer) {
-        teval = 10000
+        teval = Infinity
         ff = min
     } else {
-        teval = -10000
+        teval = -Infinity
         ff = max
     }
 
